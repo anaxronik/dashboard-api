@@ -10,10 +10,15 @@ import { TYPES } from '../types';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { IUserController } from './user.controller.interface';
+import { User } from './user.entity';
+import { IUserService } from './user.service.interface';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
-	constructor(@inject(TYPES.ILogger) private loggerService: ILogger) {
+	constructor(
+		@inject(TYPES.ILogger) private loggerService: ILogger,
+		@inject(TYPES.UserService) private userService: IUserService,
+	) {
 		super(loggerService);
 		this.bindRoutes([
 			{ path: '/register', method: 'post', func: this.register },
@@ -27,12 +32,16 @@ export class UserController extends BaseController implements IUserController {
 		next(new HTTPError(401, 'Пользователь не авторизован', 'login'));
 	}
 
-	register(
-		req: Request<{}, {}, UserRegisterDto>,
+	async register(
+		{ body }: Request<{}, {}, UserRegisterDto>,
 		res: Response,
 		next: NextFunction,
 	) {
-		console.log(req.body);
-		this.ok(res, 'register');
+		const result = await this.userService.createUser(body);
+		this.loggerService.log('new user created');
+		if (!result) {
+			return next(new HTTPError(422, 'User is exist'));
+		}
+		this.ok(res, { email: result.email, name: result.name });
 	}
 }

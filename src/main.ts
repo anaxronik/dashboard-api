@@ -7,22 +7,23 @@ import { ILogger } from './logger/logger.interface';
 import { LoggerService } from './logger/logger.service';
 import { TYPES } from './types';
 import { UserController } from './users/users.controller';
+import { UserService } from './users/users.service';
 
 function main() {
 	const appContainer = new Container();
-	appContainer.bind<ILogger>(TYPES.ILogger).to(LoggerService);
-	appContainer.bind<ExceptionFilter>(TYPES.ExceptionFilter).to(ExceptionFilter);
-	appContainer.bind<UserController>(TYPES.UserController).to(UserController);
-	appContainer.bind<App>(TYPES.Application).to(App);
+	const arr = [
+		{ symbol: TYPES.ILogger, to: LoggerService },
+		{ symbol: TYPES.ExceptionFilter, to: ExceptionFilter },
+		{ symbol: TYPES.UserController, to: UserController },
+		{ symbol: TYPES.Application, to: App },
+		{ symbol: TYPES.UserService, to: UserService },
+	];
+	arr.forEach((i) => {
+		appContainer.bind(i.symbol).to(i.to);
+	});
 	const app = appContainer.get<App>(TYPES.Application);
-	// const exc = appContainer.get<ExceptionFilter>(TYPES.ExceptionFilter);
-	// console.log(exc);
-
-	// const app = container.get<App>(TYPES.Application);
-	// console.log(app);
 	app.init();
 
-	// app.init();
 	return { appContainer, app };
 }
 
