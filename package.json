@@ -9,12 +9,13 @@
     "dev": "nodemon",
     "lint": "eslint ./src/**",
     "lint:fix": "eslint ./src/** --fix",
-    "build": "tsc"
+    "build": "npx rimraf dist/* && tsc"
   },
   "keywords": [],
   "author": "Sergei Komarov",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.20.2",
     "express": "^4.18.2",
     "inversify": "^6.0.1",
     "reflect-metadata": "^0.1.13",

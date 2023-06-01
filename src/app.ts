@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express, { Express } from 'express';
 import { inject, injectable } from 'inversify';
 import { Server } from 'node:http';
@@ -11,16 +12,20 @@ import { UserController } from './users/users.controller';
 @injectable()
 export class App {
 	app: Express;
-	port: number;
 	server: Server;
+	port: number;
 
 	constructor(
 		@inject(TYPES.ILogger) private logger: LoggerService,
-		@inject(TYPES.UserController) private userController: UserController,
 		@inject(TYPES.ExceptionFilter) private exceptionFilter: IExceptionFilter,
+		@inject(TYPES.UserController) private userController: UserController,
 	) {
 		this.app = express();
-		this.port = 8008;
+		this.port = process.env.PORT ? parseInt(process.env.PORT) : 8008;
+	}
+
+	useMiddleware() {
+		this.app.use(bodyParser.json());
 	}
 
 	useRoutes() {
@@ -32,9 +37,10 @@ export class App {
 	}
 
 	public async init() {
+		this.useMiddleware();
 		this.useRoutes();
 		this.useExceptionFilters();
 		this.server = this.app.listen(this.port);
-		console.log('> Servers start');
+		this.logger.log(`Server start on port: ${this.port}`);
 	}
 }
