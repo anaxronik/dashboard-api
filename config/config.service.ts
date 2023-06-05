@@ -23,3 +23,7 @@ export class ConfigService implements IConfigService {
 		return this.config[key] as T;
 	}
 }
+
+export enum CONFIG_KEYS {
+	'SECRET',
+}
