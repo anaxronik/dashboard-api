@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import jwt from 'jsonwebtoken';
 import { ConfigService } from '../../config/config.service';
+import { AuthGuard } from '../common/auth.guard';
 import { BaseController } from '../common/base.controller';
 import { ValidateMiddleware } from '../common/validate.middleware';
 import { HTTPError } from '../errors/http-error.class';
@@ -39,6 +40,7 @@ export class UserController extends BaseController implements IUserController {
 				path: '/info',
 				method: 'get',
 				func: this.info,
+				middlewares: [new AuthGuard()],
 			},
 		]);
 	}
@@ -62,10 +64,9 @@ export class UserController extends BaseController implements IUserController {
 		res: Response,
 		next: NextFunction,
 	) {
-		const email = req.user;
-		const user = await this.userService.findUser(email);
-		const userWithoutPassword = { ...user, password: undefined };
-		this.ok(res, { ...userWithoutPassword });
+		const user = await this.userService.findUser(req.user);
+		this.loggerService.log('new info request');
+		this.ok(res, { ...user, password: undefined });
 	}
 
 	async register(
